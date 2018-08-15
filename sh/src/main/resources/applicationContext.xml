@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- 第一步：引入外部数据库配置文件 -->
+	<context:property-placeholder location="classpath:mysql.properties" />
+
+	<!-- 第二步：开启spring容器的自动扫描功能 -->
+	<context:component-scan base-package="org.framestudy.sh"></context:component-scan>
+
+	<!-- 第三步：配置数据源连接池 -->
+	<!-- C3P0配置，详情见：https://www.mchange.com/projects/c3p0/#configuration_properties -->
+
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<!-- 先配置JDBC连接数据库的4大元素 -->
+		<property name="driverClass" value="${jdbc.driverClassName}"></property>
+		<property name="jdbcUrl" value="${jdbc.url}"></property>
+		<property name="user" value="${jdbc.userName}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+
+		<!-- 配置扩展属性 -->
+		<!-- 配置连接池中，初始化的连接条数 -->
+		<property name="initialPoolSize" value="5"></property>
+		<!-- 连接池中，允许存在的最大连接条数 -->
+		<property name="maxPoolSize" value="50"></property>
+		<!-- 连接池中，当连接不充足时，需要再次获取的连接的数量 -->
+		<property name="acquireIncrement" value="10"></property>
+		<!-- 间隔60秒钟，检测一次空闲连接，估计：作用主要是检查空闲连接，是否可用 -->
+		<property name="idleConnectionTestPeriod" value="60"></property>
+		<!-- 配置连接池，在获取连接的时候，需要执行如下查询，去检测连接是否正常 -->
+		<property name="preferredTestQuery" value="select now() from dual"></property>
+		<!-- 配置连接池中，为应用程序提供连接时，是否需要针对连接进行校验 -->
+		<property name="testConnectionOnCheckout" value="false">
+		</property>
+		<!-- 配置连接池中，应用程序归还连接的时候，是否需要针对连接进行校验 -->
+		<property name="testConnectionOnCheckin" value="false"></property>
+		<!-- 当连接关闭时，是否需要针对该连接进行自动提交，false代表：回滚 -->
+		<property name="autoCommitOnClose" value="false"></property>
+		<!-- 设置连接在创建时，最长的超时时间，如果设置为0，代表无限期等待 -->
+		<property name="checkoutTimeout" value="15000"></property>
+		<!-- 设置连接池中，最大允许存在的预编译对象的数量 -->
+		<property name="maxStatements" value="200"></property>
+	</bean>
+
+	<!-- 第四步，配置SessionFactory -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 开启自动扫描功能，扫描使用了JPA规范（注解）完成ORM映射关系的实例类 -->
+		<property name="packagesToScan">
+			<list>
+				<value>org.framestudy.sh.bean</value>
+				<value>org.framestudy.sh.extendmag</value>
+				<value>org.framestudy.sh.m2mmag</value>
+				<value>org.framestudy.sh.o2mmag</value>
+				<value>org.framestudy.sh.o2omag</value>
+			</list>
+		</property>
+		<!-- 开启自动扫描功能，扫描完成ORM映射关系的xml文件 <property name="mappingResources"> <list> 
+			<value>org/framestudy/sh/xmls/UserBean.hbm.xml</value> </list> </property> -->
+
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+
+				<prop key="hibernate.generate_statistics">true</prop>
+				<!-- session关闭时，连接自动释放 -->
+				<prop key="hibernate.connection.release_mode">auto</prop>
+				<!-- 当数据库将长时间没有访问的连接自动断开之后， hibernate框架会自动重新建立连接 -->
+				<prop key="hibernate.autoReconnect">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- 第五步，配置spring容器针对hibernate框架，封装的模板类 -->
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<!-- 第六步，配置事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<!-- 第七步，配置spring事务管理手段 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="*" read-only="true" />
+			<tx:method name="save*" read-only="false" rollback-for="java.lang.Exception"
+				propagation="REQUIRED" />
+			<tx:method name="insert*" read-only="false" rollback-for="java.lang.Exception"
+				propagation="REQUIRED" />
+			<tx:method name="update*" read-only="false" rollback-for="java.lang.Exception"
+				propagation="REQUIRED" />
+			<tx:method name="delete*" read-only="false" rollback-for="java.lang.Exception"
+				propagation="REQUIRED" />
+			<tx:method name="remove" read-only="false" rollback-for="java.lang.Exception"
+				propagation="REQUIRED" />
+			<tx:method name="get*" read-only="true" propagation="SUPPORTS" />
+			<tx:method name="list*" read-only="true" propagation="SUPPORTS" />
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config>
+		<aop:pointcut id="txPointcut"
+			expression="execution(* org.framestudy.sh.*mag.service.impl.*ServiceImpl.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut" />
+	</aop:config>
+
+	<!-- 第八步：开启切面的动态代理支持 -->
+	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+</beans>

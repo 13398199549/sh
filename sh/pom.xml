@@ -1,0 +1,115 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.framestudy</groupId>
+	<artifactId>sh</artifactId>
+	<version>1.0</version>
+	<packaging>jar</packaging>
+
+	<name>sh</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<junit.version>4.12</junit.version>
+		<spring.version>4.2.5.RELEASE</spring.version>
+		<!-- 各位看官，此处你们不需要使用如此高的版本 -->
+		<mysql.version>8.0.11</mysql.version>
+		<aspect.version>1.8.13</aspect.version>
+		<hibernate.version>4.3.11.Final</hibernate.version>
+		<log4j.version>1.2.17</log4j.version>
+	</properties>
+
+
+	<dependencies>
+
+		<!-- 引入log4j日志框架 -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+
+		<!-- 引入aspectj 切面相关JAR包 -->
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>${aspect.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${aspect.version}</version>
+		</dependency>
+
+		<!-- 引入hibernate的相关JAR包 -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+
+		<!-- 引入hibernate兼容c3p0的相关JAR包 -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+
+		<!-- 引入jdbc连接相关JAR包 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysql.version}</version>
+		</dependency>
+
+		<!-- 引入spring容器，兼容hibernate框架的相关JAR包 -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<!-- 引入spring容器相关JAR包 -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<!-- 引入spring容器兼容Junit4相关JAR包 -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<!-- 指定JAVA代码是在JDK1.8的环境下开发的 -->
+					<source>1.8</source>
+					<!-- 需要采用JDK1.8来完成源代码的编译 -->
+					<target>1.8</target>
+					<!-- 指定代码编译时，采用的字符集 -->
+					<encoding>UTF8</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
